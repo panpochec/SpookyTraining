@@ -345,6 +345,8 @@ def validation_rmse(batches, model):
 
 
 # !!!!!!!!!!!! TRAINING TEST !!!!!!!!!!!!
-training_function('./dataset2.json', num_epochs=100, load_checkpoint=True)
+if __name__ == "__main__":
 
-print('done')
+    training_function('./dataset2.json', num_epochs=100, load_checkpoint=True)
+
+    print('done')
