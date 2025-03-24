@@ -246,10 +246,12 @@ def training_function(dataset, model_name='best.pth', start_lr=0.001, num_epochs
     # Loading molecules to SpookyBatches
     molecules_test_batches = load_batches(molecules_test)
     random.shuffle(molecules_test_batches)
+    set_size = len(molecules_test_batches)
+    training_endpoint = (set_size//10) * 8
 
     # Assigning molecules to sets, should be done in a more elegant way - TODO later
-    '''training = molecules_test_batches[:1361]
-    validation = molecules_test_batches[1361:]'''
+    '''training = molecules_test_batches[:training_endpoint]
+    validation = molecules_test_batches[training_endpoint:]'''
     training = molecules_test_batches[:21]
     validation = molecules_test_batches[21:23]
 
