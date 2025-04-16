@@ -388,6 +388,7 @@ class TrainingApp:
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, factor=0.5,
                                                                         patience=25, threshold=0)
             self.model_initialized = True
+            print('Model initialized')
         elif self.model_initialized:
             raise Exception("Model already initialized!")
 
@@ -475,7 +476,9 @@ class TrainingApp:
 if __name__ == "__main__":
     start_program_time = time.perf_counter()
     training_functionality = TrainingApp()
+    print('App initialized')
     training_functionality.load_config('./config.inp')
+    print('Config loaded, starting training procedure')
     training_functionality.train_model()
     end_program_time = time.perf_counter()
     print('Done in ' + str(end_program_time - start_program_time) + 's')
