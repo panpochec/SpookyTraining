@@ -264,7 +264,7 @@ def loss_function(energy_pred_tensor=torch.FloatTensor([0]),
         """ Subtracting ground truths from predictions, 
         then summing by the short dimension of squared 
         elements and sqrt to obtain loss norm vector per atom"""
-        forces_lossnorm_per_atom = torch.sqrt(torch.sum(((forces_pred_tensor + gradients_calc_tensor)**2) ** 2, dim=1))
+        forces_lossnorm_per_atom = torch.sum(((forces_pred_tensor + gradients_calc_tensor)**2), dim=1)
 
         """ Equation L = sqrt(sumBsum(a/BNi)"""
         b_times_N = atom_permolecule_to_atom*molecule_amount
@@ -286,7 +286,7 @@ def loss_function(energy_pred_tensor=torch.FloatTensor([0]),
 
         dot_loss1 = (torch.sum((K - J)))/len(K)
         '''ver 2, no comparing to the norm of vectors, just the'''
-        dot_loss2 = torch.exp(torch.sum(-(torch.einsum('nm,nm->n', forces_pred_tensor, (-gradients_calc_tensor)))))
+        dot_loss2 = torch.exp(torch.sum(-(torch.einsum('nm,nm->n', forces_pred_tensor, (-gradients_calc_tensor)))/K))
 
     loss = energy_loss + forces_loss + dipole_loss + dot_loss2
 
