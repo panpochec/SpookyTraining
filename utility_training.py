@@ -215,6 +215,7 @@ def loss_function(energy_pred_tensor=torch.FloatTensor([0]),
                   forces_bool=False,
                   energies_bool=True,
                   dipole_bool=False,
+                  forces_dot_bool=False,
                   type_forces='bymolecule',
                   e_weight=1,
                   f_weight=100,
@@ -233,6 +234,7 @@ def loss_function(energy_pred_tensor=torch.FloatTensor([0]),
     :param forces_bool: if using forces for loss
     :param energies_bool: if using energies for loss
     :param dipole_bool: if using dipole moments for loss - IMPORTANT: for the first backward pass it always need to be False
+    :param forces_dot_bool: if using a special function penalizing wrong direction of the force acting on atom
     :param type_forces: byatom or bymolecule, specifies if the mean of the forces is first calculated for each molecule
     :param e_weight: energy loss weight
     :param f_weight: forces loss weight
@@ -274,6 +276,18 @@ def loss_function(energy_pred_tensor=torch.FloatTensor([0]),
         dipole_loss = torch.sqrt(sum((vectored_dipmom_pred - dipole_calc_tensor) ** 2) / (len(dipole_pred_tensor)))
         dipole_loss = q_weight * dipole_loss
 
-    loss = energy_loss + forces_loss + dipole_loss
+    if forces_dot_bool:
+        forces_pred_norm = torch.sqrt(torch.sum(forces_pred_tensor**2, dim=1))
+        forces_calc_norm = torch.sqrt(torch.sum((-gradients_calc_tensor) ** 2, dim=1))
+        K = forces_pred_norm * forces_calc_norm
+
+        # J = torch.dot(forces_pred_tensor, (-gradients_calc_tensor))
+        J = torch.einsum('nm,nm->n', forces_pred_tensor, (-gradients_calc_tensor))
+
+        dot_loss1 = (torch.sum((K - J)))/len(K)
+        '''ver 2, no comparing to the norm of vectors, just the'''
+        dot_loss2 = torch.exp(torch.sum(-(torch.einsum('nm,nm->n', forces_pred_tensor, (-gradients_calc_tensor)))))
+
+    loss = energy_loss + forces_loss + dipole_loss + dot_loss2
 
     return loss, energy_loss, forces_loss, dipole_loss
